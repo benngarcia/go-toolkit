@@ -2,6 +2,7 @@ package epub
 
 import (
 	"context"
+	gurl "net/url"
 	"strconv"
 
 	"github.com/antchfx/xmlquery"
@@ -56,7 +57,8 @@ func GetRootFilePath(ctx context.Context, fetcher fetcher.Fetcher) (url.URL, err
 	if p == "" {
 		return nil, errors.New("no full-path in rootfile")
 	}
-	u, merr := url.FromEPUBHref(p)
+	// OCF full-path names a ZIP member; it is not an encoded OPF href.
+	u, merr := url.URLFromGo(&gurl.URL{Path: p})
 	if merr != nil {
 		return nil, errors.Wrap(err, "failed parsing rootfile full-path")
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	gurl "net/url"
 	"path"
 
 	"github.com/readium/go-toolkit/pkg/archive"
@@ -23,10 +24,12 @@ func (f *ArchiveFetcher) Links(ctx context.Context) (manifest.LinkList, error) {
 	links := make(manifest.LinkList, 0, len(entries))
 	for _, af := range entries {
 		fp := path.Clean(af.Path())
-		href, err := manifest.NewHREFFromString(fp, false)
+		// Archive names are decoded filesystem paths, not URI references.
+		u, err := url.URLFromGo(&gurl.URL{Path: fp})
 		if err != nil {
 			return nil, err
 		}
+		href := manifest.NewHREF(u)
 		link := manifest.Link{
 			Href: href,
 		}
